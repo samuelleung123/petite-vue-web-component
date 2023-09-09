@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Demo</title>
-    <script type="module">
-        import {async_animate, async_until, WC_Directives, Web_Component} from "./web-component.esm.js";
+	<meta charset="UTF-8">
+	<title>Demo</title>
+	<script type="module">
+		import {async_animate, async_until, WC_Directives, Web_Component} from "./web-component.esm.js";
 
-        const ChildComponent = {
-            name: 'child-component',
-            directives: {
-                ...WC_Directives,
-            },
-            template: `
+		const ChildComponent = {
+			name: 'child-component',
+			directives: {
+				...WC_Directives,
+			},
+			template: `
 				<div>
 				<h1>Child Component</h1>
 				<div>
@@ -24,45 +24,45 @@
 				{{ counter }}
 				</div>
             `,
-            props: {
-                count: Number,
-                list: Array,
-            },
-            data(props, el) {
-                return {
-                    counter: {
-                        value: 0,
-                    },
-                    async mounted() {
-                        console.log('child-component mounted');
-                        el.effect(() => {
-                            this.counter.value = props?.list?.length || 0;
-                        });
-                    },
-                    unmounted() {
-                        console.log('child-component unmounted');
-                    },
-                    add() {
-                        el.$emit('update:count', props.count + 1);
-                        props.list.push(props.count + 1);
-                    },
-                    minus() {
-                        el.$emit('update:count', props.count - 1);
-                        props.list.push(props.count - 1);
-                    }
-                }
-            }
-        }
+			props: {
+				count: Number,
+				list: Array,
+			},
+			data(props, el) {
+				return {
+					counter: {
+						value: 0,
+					},
+					async mounted() {
+						console.log('child-component mounted');
+						el.effect(() => {
+							this.counter.value = props?.list?.length || 0;
+						});
+					},
+					unmounted() {
+						console.log('child-component unmounted');
+					},
+					add() {
+						el.$emit('update:count', props.count + 1);
+						props.list.push(props.count + 1);
+					},
+					minus() {
+						el.$emit('update:count', props.count - 1);
+						props.list.push(props.count - 1);
+					}
+				}
+			}
+		}
 
-        const DemoComponent = {
-            name: 'demo-component',
-            components: {
-                ChildComponent,
-            },
-            directives: {
-                ...WC_Directives,
-            },
-            template: `
+		const DemoComponent = {
+			name: 'demo-component',
+			components: {
+				ChildComponent,
+			},
+			directives: {
+				...WC_Directives,
+			},
+			template: `
 				<div>
 				<h1>v-model</h1>
 				<input type="number" v-model="count"/>
@@ -99,38 +99,38 @@
                     ></child-component>
 				</div>
             `,
-            props: {
-                prop_1: String,
-                prop_2: Object,
-            },
-            data(props, el) {
-                console.log({
-                    props,
-                    el
-                })
-                return {
-                    count: 0,
-                    list: [],
-                    show_child_component: true,
-                    mounted() {
-                        el.expose_function = this.expose_function.bind(this);
-                    },
-                    expose_function() {
-                        console.log('expose function');
-                        console.log(this.count);
-                    }
-                }
-            }
-        }
+			props: {
+				prop_1: String,
+				prop_2: Object,
+			},
+			data(props, el) {
+				console.log({
+					props,
+					el
+				})
+				return {
+					count: 0,
+					list: [],
+					show_child_component: true,
+					mounted() {
+						el.expose_function = this.expose_function.bind(this);
+					},
+					expose_function() {
+						console.log('expose function');
+						console.log(this.count);
+					}
+				}
+			}
+		}
 
-        Web_Component.register(DemoComponent);
+		Web_Component.register(DemoComponent);
 
-        Web_Component.register({
-            name: 'animate-counter',
-            directives: {
-                ...WC_Directives,
-            },
-            template: `
+		Web_Component.register({
+			name: 'animate-counter',
+			directives: {
+				...WC_Directives,
+			},
+			template: `
 				<style>
 				.box {
 					width: 100px;
@@ -146,71 +146,71 @@
 					{{ box_breakpoints?.window_width }}px
 				</div>
             `,
-            data(props, el) {
-                return {
-                    is_running: false,
-                    box_width: '100px',
-                    box_breakpoints: null,
-                    get_background_color() {
-                        if (!this.box_breakpoints) {
-                            return "red";
-                        }
+			data(props, el) {
+				return {
+					is_running: false,
+					box_width: '100px',
+					box_breakpoints: null,
+					get_background_color() {
+						if (!this.box_breakpoints) {
+							return "red";
+						}
 
-                        if (this.box_breakpoints.is_sm) {
-                            return "blue";
-                        }
+						if (this.box_breakpoints.is_sm) {
+							return "blue";
+						}
 
-                        if (this.box_breakpoints.is_md) {
-                            return "green";
-                        }
+						if (this.box_breakpoints.is_md) {
+							return "green";
+						}
 
-                        if (this.box_breakpoints.is_lg) {
-                            return "yellow";
-                        }
+						if (this.box_breakpoints.is_lg) {
+							return "yellow";
+						}
 
-                        if (this.box_breakpoints.is_xl) {
-                            return "orange";
-                        }
+						if (this.box_breakpoints.is_xl) {
+							return "orange";
+						}
 
-                        return "red";
-                    },
-                    async start() {
-                        if (this.is_running) {
-                            return
-                        }
-                        this.is_running = true;
-                        let target = 2048;
-                        console.log('start');
-                        await async_animate({
-                            duration: 5000,
-                            draw: (progress) => {
-                                this.box_width = 100 + (target * progress) + 'px';
-                            }
-                        });
-                        await async_animate({
-                            duration: 1000,
-                            draw: (progress) => {
-                                this.box_width = 100 + (target * (1 - progress)) + 'px';
-                            }
-                        });
-                        console.log('end');
-                        this.is_running = false;
-                    }
-                }
-            }
-        })
-    </script>
+						return "red";
+					},
+					async start() {
+						if (this.is_running) {
+							return
+						}
+						this.is_running = true;
+						let target = 2048;
+						console.log('start');
+						await async_animate({
+							duration: 5000,
+							draw: (progress) => {
+								this.box_width = 100 + (target * progress) + 'px';
+							}
+						});
+						await async_animate({
+							duration: 1000,
+							draw: (progress) => {
+								this.box_width = 100 + (target * (1 - progress)) + 'px';
+							}
+						});
+						console.log('end');
+						this.is_running = false;
+					}
+				}
+			}
+		})
+	</script>
 </head>
 <body>
 <demo-component prop_1="hi" prop_2='{"key": "value"}'></demo-component>
 <animate-counter></animate-counter>
 
 <script type="module">
-    import {async_until} from "./web-component.esm.js";
+	import {async_until} from "./web-component.esm.js";
 
-    let demo_component = document.querySelector('demo-component');
-    await async_until(() => demo_component.isConnected);
-    demo_component.expose_function();
+	let demo_component = document.querySelector('demo-component');
+	await async_until(() => demo_component.isConnected);
+	demo_component.expose_function();
 </script>
 </body>
 </html>
