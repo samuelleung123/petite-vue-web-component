@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+    <script type="module">
+        import {async_animate, async_until, WC_Directives, Web_Component} from "./web-component.esm.js";
+
+        const ChildComponent = {
+            name: 'child-component',
+            directives: {
+                ...WC_Directives,
+            },
+            template: `
+				<div>
+				<h1>Child Component</h1>
+				<div>
+					<button @click="minus">-</button>
+					{{ props.count }}
+					<button @click="add">+</button>
+				</div>
+				{{ props.list }}<br/>
+
+				{{ counter }}
+				</div>
+            `,
+            props: {
+                count: Number,
+                list: Array,
+            },
+            data(props, el) {
+                return {
+                    counter: {
+                        value: 0,
+                    },
+                    async mounted() {
+                        console.log('child-component mounted');
+                        el.effect(() => {
+                            this.counter.value = props?.list?.length || 0;
+                        });
+                    },
+                    unmounted() {
+                        console.log('child-component unmounted');
+                    },
+                    add() {
+                        el.$emit('update:count', props.count + 1);
+                        props.list.push(props.count + 1);
+                    },
+                    minus() {
+                        el.$emit('update:count', props.count - 1);
+                        props.list.push(props.count - 1);
+                    }
+                }
+            }
+        }
+
+        const DemoComponent = {
+            name: 'demo-component',
+            components: {
+                ChildComponent,
+            },
+            directives: {
+                ...WC_Directives,
+            },
+            template: `
+				<div>
+				<h1>v-model</h1>
+				<input type="number" v-model="count"/>
+				<div>
+					{{ count }}
+				</div>
+				</div>
+
+				<div>
+				<h1>v-on (Press Enter)</h1>
+				<input type="number" @keyup.enter="count = $event.target.value"/>
+				<div>
+					{{ count }}
+				</div>
+				</div>
+
+				<div>
+				<h1>Props</h1>
+				<div>
+					prop_1: {{ props.prop_1 }} <br>
+					prop_2: {{ props.prop_2 }} <br>
+					typeof prop_2: {{ typeof props.prop_2 }} <br>
+					list: {{ list }}
+				</div>
+				</div>
+
+                <div>Show child-component: <button @click="show_child_component = true">Show</button> <button @click="show_child_component = false">Hide</button></div>
+                <div v-if="show_child_component">
+                    <child-component
+                        v-for="i in 5"
+                        style="border: 1px solid black; display: block; padding: 15px"
+                        v-wc-model:count="count"
+                        v-wc-model:list="list"
+                    ></child-component>
+				</div>
+            `,
+            props: {
+                prop_1: String,
+                prop_2: Object,
+            },
+            data(props, el) {
+                console.log({
+                    props,
+                    el
+                })
+                return {
+                    count: 0,
+                    list: [],
+                    show_child_component: true,
+                    mounted() {
+                        el.expose_function = this.expose_function.bind(this);
+                    },
+                    expose_function() {
+                        console.log('expose function');
+                        console.log(this.count);
+                    }
+                }
+            }
+        }
+
+        Web_Component.register(DemoComponent);
+
+        Web_Component.register({
+            name: 'animate-counter',
+            directives: {
+                ...WC_Directives,
+            },
+            template: `
+				<style>
+				.box {
+					width: 100px;
+					height: 100px;
+                    display: flex;
+                    align-items: center;
+                    padding-left: 20px;
+                    font-weight: bold;
+				}
+				</style>
+				<button @click="start()">Start</button>
+				<div class="box" v-wc-breakpoints="box_breakpoints" :style="{backgroundColor: get_background_color(), width: box_width}">
+					{{ box_breakpoints?.window_width }}px
+				</div>
+            `,
+            data(props, el) {
+                return {
+                    is_running: false,
+                    box_width: '100px',
+                    box_breakpoints: null,
+                    get_background_color() {
+                        if (!this.box_breakpoints) {
+                            return "red";
+                        }
+
+                        if (this.box_breakpoints.is_sm) {
+                            return "blue";
+                        }
+
+                        if (this.box_breakpoints.is_md) {
+                            return "green";
+                        }
+
+                        if (this.box_breakpoints.is_lg) {
+                            return "yellow";
+                        }
+
+                        if (this.box_breakpoints.is_xl) {
+                            return "orange";
+                        }
+
+                        return "red";
+                    },
+                    async start() {
+                        if (this.is_running) {
+                            return
+                        }
+                        this.is_running = true;
+                        let target = 2048;
+                        console.log('start');
+                        await async_animate({
+                            duration: 5000,
+                            draw: (progress) => {
+                                this.box_width = 100 + (target * progress) + 'px';
+                            }
+                        });
+                        await async_animate({
+                            duration: 1000,
+                            draw: (progress) => {
+                                this.box_width = 100 + (target * (1 - progress)) + 'px';
+                            }
+                        });
+                        console.log('end');
+                        this.is_running = false;
+                    }
+                }
+            }
+        })
+    </script>
+</head>
+<body>
+<demo-component prop_1="hi" prop_2='{"key": "value"}'></demo-component>
+<animate-counter></animate-counter>
+
+<script type="module">
+    import {async_until} from "./web-component.esm.js";
+
+    let demo_component = document.querySelector('demo-component');
+    await async_until(() => demo_component.isConnected);
+    demo_component.expose_function();
+</script>
+</body>
+</html>

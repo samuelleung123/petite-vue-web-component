@@ -1,0 +1,19 @@
+{
+  "name": "web-component-base",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build_esm": "esbuild web-component.esm.js --sourcemap --bundle --minify --outfile=dist/web-component.esm.js --format=esm",
+    "serve_esm": "esbuild web-component.esm.js --sourcemap --bundle --minify --outfile=dist/web-component.esm.js --format=esm --watch",
+    "build": "esbuild web-component.js --sourcemap --bundle --minify --outfile=dist/web-component.js --format=iife",
+    "serve": "esbuild web-component.js --sourcemap --bundle --minify --outfile=dist/web-component.js --format=iife --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esbuild": "^0.17.19",
+    "sass": "^1.62.1"
+  }
+}
